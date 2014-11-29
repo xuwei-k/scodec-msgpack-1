@@ -136,10 +136,7 @@ object Serialize {
     }
 
     def unpack(v: MessagePack): Option[String] = v match {
-      case MFixString(n) => n.some
-      case MString8(n) => n.some
-      case MString16(n) => n.some
-      case MString32(n) => n.some
+      case s: MString => Some(s.value)
       case _ => None
     }
   }
@@ -153,9 +150,7 @@ object Serialize {
     }
 
     def unpack(v: MessagePack): Option[ByteVector] = v match {
-      case MBinary8(n) => n.some
-      case MBinary16(n) => n.some
-      case MBinary32(n) => n.some
+      case bin: MBinary => Some(bin.value)
       case _ => None
     }
   }
@@ -170,9 +165,7 @@ object Serialize {
     }
 
     def unpack(v: MessagePack): Option[Vector[A]] = v match {
-      case MFixArray(n) => n.map(S.unpack).sequence
-      case MArray16(n) => n.map(S.unpack).sequence
-      case MArray32(n) => n.map(S.unpack).sequence
+      case array: MArray => array.value.traverse(S.unpack)
       case _ => None
     }
   }
@@ -187,9 +180,7 @@ object Serialize {
     }
 
     def unpack(v: MessagePack): Option[Map[A, B]] = v match {
-      case MFixMap(n) => n.toVector.map { case (k, v) => S.unpack(k).flatMap(kk => T.unpack(v).map((kk, _))) }.sequence.map(_.toMap)
-      case MMap16(n) => n.toVector.map { case (k, v) => S.unpack(k).flatMap(kk => T.unpack(v).map((kk, _))) }.sequence.map(_.toMap)
-      case MMap32(n) => n.toVector.map { case (k, v) => S.unpack(k).flatMap(kk => T.unpack(v).map((kk, _))) }.sequence.map(_.toMap)
+      case m: MMap => m.value.toVector.traverse{ case (k, v) => S.unpack(k).flatMap(kk => T.unpack(v).map((kk, _))) }.map(_.toMap)
       case _ => None
     }
   }
@@ -210,14 +201,7 @@ object Serialize {
     }
 
     def unpack(v: MessagePack): Option[A] = v match {
-      case MFixExtended1(_, value) => S.decodeValue(value.bits).toOption
-      case MFixExtended2(_, value) => S.decodeValue(value.bits).toOption
-      case MFixExtended4(_, value) => S.decodeValue(value.bits).toOption
-      case MFixExtended8(_, value) => S.decodeValue(value.bits).toOption
-      case MFixExtended16(_, value) => S.decodeValue(value.bits).toOption
-      case MExtended8(_, _, value) => S.decodeValue(value.bits).toOption
-      case MExtended16(_, _, value) => S.decodeValue(value.bits).toOption
-      case MExtended32(_, _, value) => S.decodeValue(value.bits).toOption
+      case e: MExtended => S.decodeValue(e.data.bits).toOption
       case _ => None
     }
   }
