@@ -19,6 +19,14 @@ object ScodecMsgPackBuild extends Build {
     scalaVersion := "2.11.4",
     crossScalaVersions := Seq("2.10.4", scalaVersion.value),
     resolvers += Opts.resolver.sonatypeReleases,
+    scalacOptions in (Compile, doc) ++= {
+      val tag = if(isSnapshot.value) gitHash else { "v" + version.value }
+      Seq(
+        "-sourcepath", baseDirectory.value.getAbsolutePath,
+        "-doc-source-url", s"https://github.com/pocketberserker/scodec-msgpack/tree/${tag}€{FILE_PATH}.scala",
+        "-skip-packages", "scalaz" // http://stackoverflow.com/a/26718427/605582
+      )
+    },
     scalacOptions ++= (
       "-deprecation" ::
       "-unchecked" ::
