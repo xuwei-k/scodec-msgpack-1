@@ -7,6 +7,8 @@ import com.typesafe.sbt.pgp.PgpKeys
 import sbtbuildinfo.Plugin._
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
+import com.typesafe.tools.mima.plugin.MimaKeys.previousArtifacts
 
 object ScodecMsgPackBuild extends Build {
 
@@ -16,7 +18,8 @@ object ScodecMsgPackBuild extends Build {
 
   lazy val buildSettings = Seq(
     sonatypeSettings,
-    buildInfoSettings
+    buildInfoSettings,
+    mimaDefaultSettings
   ).flatten ++ Seq(
     name := "scodec-msgpack",
     scalaVersion := "2.11.7",
@@ -121,7 +124,10 @@ object ScodecMsgPackBuild extends Build {
   lazy val msgpack = crossProject.in(file(".")).settings(
     buildSettings: _*
   ).jvmSettings(
-    libraryDependencies += "org.msgpack" % "msgpack-core" % "0.7.1" % "test"
+    libraryDependencies += "org.msgpack" % "msgpack-core" % "0.7.1" % "test",
+    previousArtifacts := Set(
+      organization.value % (name.value + "_" + scalaBinaryVersion.value) % "0.3.0"
+    )
   )
 
   lazy val msgpackJVM = msgpack.jvm
