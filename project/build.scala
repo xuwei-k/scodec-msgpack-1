@@ -112,6 +112,8 @@ object ScodecMsgPackBuild extends Build {
     }
   )
 
+  val messagePackJS = SettingKey[xsbti.api.Lazy[String]]("messagePackJS")
+
   lazy val root = project.in(file(".")).settings(
     buildSettings
   ).settings(
@@ -124,6 +126,23 @@ object ScodecMsgPackBuild extends Build {
     buildSettings: _*
   ).jvmSettings(
     libraryDependencies += "org.msgpack" % "msgpack-core" % "0.7.1" % "test"
+  ).jsSettings(
+    // http://stackoverflow.com/a/31954152
+    jsDependencies += ProvidedJS / "msgpack.js" commonJSName "msgpack",
+    messagePackJS := xsbti.SafeLazy{
+      IO.withTemporaryDirectory{ dir =>
+        val f = dir / "msgpack.codec.js"
+        val u = "https://raw.githubusercontent.com/msgpack/msgpack-javascript/2cfda99e28b/msgpack.codec.js"
+        println("download from " + u)
+        IO.download(url(u), f)
+        IO.read(f)
+      }
+    },
+    resourceGenerators in Test += task{
+      val js = (resourceManaged in Test).value / "msgpack.js"
+      IO.write(js, messagePackJS.value.get)
+      Seq(js)
+    }
   )
 
   lazy val msgpackJVM = msgpack.jvm
