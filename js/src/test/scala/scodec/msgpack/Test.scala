@@ -34,7 +34,7 @@ class Test extends FunSpec with Checkers {
       check((i: A) => {
         val packed = Codec[A].encode(i).require.toByteArray.toJSArray
         val unpacked = try {
-          js.Dynamic.global.msgpack.decode(packed)
+          js.Dynamic.global.msgpack.decode(packed.map(_ & 0xff))
         } catch {
           case e: Throwable =>
             println("could not unpack " + packed)
