@@ -60,7 +60,12 @@ object Serialize {
       case MInt8(n) => Attempt.successful(n)
       case MInt16(n) => Attempt.successful(n)
       case MInt32(n) => Attempt.successful(n)
-      case _ => fail("Int")
+      case MInt64(n) =>
+        if(Int.MinValue <= n && n <= Int.MaxValue)
+          Attempt.successful(n.toInt)
+        else
+          fail(s"Int $n")
+      case _ => fail(s"Int $v")
     }
   }
 
