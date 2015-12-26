@@ -132,7 +132,7 @@ object ScodecMsgPackBuild extends Build {
     messagePackJS := xsbti.SafeLazy{
       IO.withTemporaryDirectory{ dir =>
         val f = dir / "msgpack.codec.js"
-        val u = "https://raw.githubusercontent.com/msgpack/msgpack-javascript/2cfda99e28b/msgpack.codec.js"
+        val u = "https://raw.githubusercontent.com/kawanet/msgpack-lite/8f08a3e3/dist/msgpack.min.js"
         println("download from " + u)
         IO.download(url(u), f)
         IO.read(f)

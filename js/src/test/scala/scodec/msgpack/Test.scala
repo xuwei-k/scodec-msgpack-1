@@ -14,7 +14,7 @@ class Test extends FunSpec with Checkers {
   private[this] def test[A: Codec: Arbitrary](name: String) = describe(name){
     it("pack js and unpack scala-js"){
       check((i: A) => {
-        val packed = js.Dynamic.global.msgpack.msgpack.pack(i.asInstanceOf[js.Any]).asInstanceOf[js.Array[Int]]
+        val packed = js.Dynamic.global.msgpack.encode(i.asInstanceOf[js.Any]).asInstanceOf[js.Array[Int]]
         val array = BitVector(packed.toArray.map(_.toByte))
         val unpacked = try {
           Codec[A].decodeValue(array).require
@@ -25,7 +25,6 @@ class Test extends FunSpec with Checkers {
             throw e
         }
 
-        println(List(packed, i, unpacked))
         assert(i == unpacked)
         true
       }, MinSuccessful(1000))
@@ -35,7 +34,7 @@ class Test extends FunSpec with Checkers {
       check((i: A) => {
         val packed = Codec[A].encode(i).require.toByteArray.toJSArray
         val unpacked = try {
-          js.Dynamic.global.msgpack.msgpack.unpack(packed)
+          js.Dynamic.global.msgpack.decode(packed)
         } catch {
           case e: Throwable =>
             println("could not unpack " + packed)
@@ -43,7 +42,6 @@ class Test extends FunSpec with Checkers {
             throw e
         }
 
-        println(List(packed, i, unpacked))
         assert(i == unpacked)
         true
       }, MinSuccessful(1000))
@@ -51,9 +49,9 @@ class Test extends FunSpec with Checkers {
 
     it("pack js and unpack js"){
       check((i: A) => {
-        val packed = js.Dynamic.global.msgpack.msgpack.pack(i.asInstanceOf[js.Any])
+        val packed = js.Dynamic.global.msgpack.encode(i.asInstanceOf[js.Any])
         val unpacked = try {
-          js.Dynamic.global.msgpack.msgpack.unpack(packed)
+          js.Dynamic.global.msgpack.decode(packed)
         } catch {
           case e: Throwable =>
             println("could not unpack " + packed)
@@ -61,7 +59,6 @@ class Test extends FunSpec with Checkers {
             throw e
         }
 
-        println(List(packed, i, unpacked))
         assert(i == unpacked)
         true
       }, MinSuccessful(1000))
