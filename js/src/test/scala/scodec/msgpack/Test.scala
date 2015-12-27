@@ -25,7 +25,6 @@ class Test extends FunSpec with Checkers {
             throw e
         }
 
-        println(List(packed, i, unpacked))
         assert(i == unpacked)
         true
       }, MinSuccessful(1000))
@@ -35,7 +34,7 @@ class Test extends FunSpec with Checkers {
       check((i: A) => {
         val packed = Codec[A].encode(i).require.toByteArray.toJSArray
         val unpacked = try {
-          js.Dynamic.global.msgpack.msgpack.unpack(packed)
+          js.Dynamic.global.msgpack.msgpack.unpack(packed.map(_ & 0xff))
         } catch {
           case e: Throwable =>
             println("could not unpack " + packed)
@@ -43,7 +42,6 @@ class Test extends FunSpec with Checkers {
             throw e
         }
 
-        println(List(packed, i, unpacked))
         assert(i == unpacked)
         true
       }, MinSuccessful(1000))
@@ -61,7 +59,6 @@ class Test extends FunSpec with Checkers {
             throw e
         }
 
-        println(List(packed, i, unpacked))
         assert(i == unpacked)
         true
       }, MinSuccessful(1000))
